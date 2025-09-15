@@ -1,0 +1,57 @@
+-- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
+--
+-- Host: 127.0.0.2    Database: codex
+-- ------------------------------------------------------
+-- Server version	5.5.5-10.4.32-MariaDB
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `passwords`
+--
+
+DROP TABLE IF EXISTS `passwords`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `passwords` (
+  `idPassword` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `idContatto` int(10) unsigned NOT NULL,
+  `psw` varchar(255) NOT NULL,
+  `sale` varchar(16) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`idPassword`),
+  KEY `passwords_idcontatto_foreign` (`idContatto`),
+  CONSTRAINT `passwords_idcontatto_foreign` FOREIGN KEY (`idContatto`) REFERENCES `contatti` (`idContatto`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `passwords`
+--
+
+LOCK TABLES `passwords` WRITE;
+/*!40000 ALTER TABLE `passwords` DISABLE KEYS */;
+INSERT INTO `passwords` VALUES (1,1,'$2y$12$Mik838EAyGqGAaL68BHzNuRg14uIYyAF.lf6xI7T0Sih0oVWkg4wK','HMCKDKURpmT4iquy','2025-09-11 12:31:35','2025-09-11 12:31:35'),(2,2,'$2y$12$/bXk1rx8MIpGtiIo.5twFeVrvnn0rcYvMDHJRQ/Biibf99tKIHxxS','q9lqLAHCUomHVmR1','2025-09-11 12:31:36','2025-09-11 12:31:36'),(3,3,'$2y$12$0YRvBx5y9.Y.LbPV2SON6unE4m/nE4nG/UGS8MOVTSTqYaNYEr23S','M2uUuDtbamchWESg','2025-09-11 12:31:36','2025-09-11 12:31:36'),(4,4,'$2y$12$AJ0M0WDa8QbDQKdMYlVrmerkVr0u.3aVy9aQDPVa7h2zfe0WzATfS','SF7eHAAfqdsdW65r','2025-09-11 12:31:36','2025-09-11 12:31:36'),(5,5,'$2y$12$rUA1UMH87.bIkNfifqeXBeEGYGf2IGDg1KRCNsgEoWbWCTX5TCp8G','CIt2KL1Iz2Fa2Ugc','2025-09-11 12:31:36','2025-09-11 12:31:36'),(6,6,'$2y$12$7PFgWHLB7sG9YP/l5S.1WueW9YSmjDzloW0KyRvwNyL67lckyO676','RB5qaIkGFNVsBAzp','2025-09-11 12:31:36','2025-09-11 12:31:36'),(7,7,'$2y$12$8n5HTs4nfWvFz2yoLi53xeUQAFgf5fRkzRE0HtJ8XNhpfom4nrwP2','ibnU52JeBpWkeWBA','2025-09-11 12:31:36','2025-09-11 12:31:36'),(8,8,'$2y$12$HHi2mU1KTdDRP3rdA7R3GOwrNfLEgsDZs73eqhG4BBF.3kwBQToXC','qYZJz1sQeMsSebju','2025-09-11 12:31:37','2025-09-11 12:31:37'),(9,9,'$2y$12$bdAgD2wZzc7t9CQCJc3HjOZk86Iim6jGqS9MhhI1QfJxLZtClVW9a','FnyLGkabBAnDAgZ5','2025-09-11 12:31:37','2025-09-11 12:31:37'),(10,10,'$2y$12$NxwrrVJUGz2Q4xxiQZItRu8ilRNE0xBmYZ.2OgqxoAOiy0ZMhg4pK','nqSudsNL3SoWVgnY','2025-09-11 12:31:37','2025-09-11 12:31:37');
+/*!40000 ALTER TABLE `passwords` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-09-15  9:40:13

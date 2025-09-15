@@ -1,0 +1,16 @@
+{
+  "client": "Thunder Client",
+  "environmentName": "API Testing",
+  "dateExported": "2023-07-05T10:00:00.000Z",
+  "version": "1.0",
+  "variables": [
+    {
+      "name": "baseUrl",
+      "value": "http://localhost/EsameSess4/Codex/public/api"
+    },
+    {
+      "name": "token",
+      "value": ""
+    }
+  ]
+}

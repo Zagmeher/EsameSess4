@@ -1,0 +1,86 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "API Authentication Tests",
+  "dateExported": "2023-07-05T10:00:00.000Z",
+  "version": "1.1",
+  "folders": [],
+  "requests": [
+    {
+      "name": "Login",
+      "url": "http://localhost/EsameSess4/Codex/public/api/auth/login",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"utente@example.com\",\n  \"password\": \"password123\"\n}"
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "success",
+          "action": "equal",
+          "value": "true"
+        },
+        {
+          "type": "json-query",
+          "custom": "data.token",
+          "action": "exists"
+        }
+      ]
+    },
+    {
+      "name": "Login - Credenziali non valide",
+      "url": "http://localhost/EsameSess4/Codex/public/api/auth/login",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"utente@example.com\",\n  \"password\": \"passwordErrata\"\n}"
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "401"
+        },
+        {
+          "type": "json-query",
+          "custom": "success",
+          "action": "equal",
+          "value": "false"
+        },
+        {
+          "type": "json-query",
+          "custom": "message",
+          "action": "contains",
+          "value": "Credenziali non valide"
+        }
+      ]
+    }
+  ]
+}
