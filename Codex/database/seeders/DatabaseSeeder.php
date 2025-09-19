@@ -16,14 +16,13 @@ class DatabaseSeeder extends Seeder
             NazioniSeeder::class,
             ComuniSeeder::class,
             
-            // Utenti di test per autenticazione JWT (rimosso in favore di ContattiAuthSeeder)
-            // UsersTableSeeder::class,
+            // Dati dominio base
+            ContattiSeeder::class, // Prima popolo i contatti random
             
-            // Seeder per contatti e autenticazione
+            // Utenti di test per autenticazione JWT (admin e utente base) DOPO i contatti
             ContattiAuthSeeder::class,
             
             // Aggiungo i nuovi seeder per i dati di test
-            ContattiSeeder::class,
             PasswordsSeeder::class,
             IndirizziSeeder::class,
             SerieTvSeeder::class,

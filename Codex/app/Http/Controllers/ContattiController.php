@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class ContattiController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth:api', 'admin']);
+    }
     /**
      * Display a listing of the resource.
      */

@@ -45,7 +45,7 @@ CREATE TABLE `film` (
 
 LOCK TABLES `film` WRITE;
 /*!40000 ALTER TABLE `film` DISABLE KEYS */;
-INSERT INTO `film` VALUES (2,3,'Pulp Fiction','Le vite di due sicari, un pugile, un gangster e sua moglie si intrecciano in quattro storie.',154,'Quentin Tarantino','John Travolta, Uma Thurman',1994,5,1,'2025-09-11 12:32:28','2025-09-11 12:32:28'),(3,2,'Inception','Un ladro che ruba segreti aziendali infiltrandosi nel subconscio.',148,'Christopher Nolan','Leonardo DiCaprio, Joseph Gordon-Levitt',2010,3,12,'2025-09-11 12:32:28','2025-09-11 12:32:28'),(4,4,'La vita è bella','Un padre usa l\'immaginazione per proteggere il figlio dagli orrori dell\'Olocausto.',116,'Roberto Benigni','Roberto Benigni, Nicoletta Braschi',1997,15,6,'2025-09-11 12:32:28','2025-09-11 12:32:28'),(5,2,'Avatar','Un marine paraplegico inviato sulla luna Pandora per una missione speciale.',162,'James Cameron','Sam Worthington, Zoe Saldana',2009,2,11,'2025-09-11 12:32:28','2025-09-11 12:32:28');
+INSERT INTO `film` VALUES (1,1,'Il Padrino','La storia della famiglia mafiosa Corleone dal 1945 al 1955.',175,'Francis Ford Coppola','Marlon Brando, Al Pacino',1972,15,2,'2025-09-19 12:11:01','2025-09-19 12:11:01'),(2,3,'Pulp Fiction','Le vite di due sicari, un pugile, un gangster e sua moglie si intrecciano in quattro storie.',154,'Quentin Tarantino','John Travolta, Uma Thurman',1994,19,15,'2025-09-19 12:11:01','2025-09-19 12:11:01'),(3,2,'Inception','Un ladro che ruba segreti aziendali infiltrandosi nel subconscio.',148,'Christopher Nolan','Leonardo DiCaprio, Joseph Gordon-Levitt',2010,6,11,'2025-09-19 12:11:01','2025-09-19 12:11:01'),(4,4,'La vita è bella','Un padre usa l\'immaginazione per proteggere il figlio dagli orrori dell\'Olocausto.',116,'Roberto Benigni','Roberto Benigni, Nicoletta Braschi',1997,3,11,'2025-09-19 12:11:01','2025-09-19 12:11:01'),(5,2,'Avatar','Un marine paraplegico inviato sulla luna Pandora per una missione speciale.',162,'James Cameron','Sam Worthington, Zoe Saldana',2009,10,5,'2025-09-19 12:11:01','2025-09-19 12:11:01');
 /*!40000 ALTER TABLE `film` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -58,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-15  9:40:13
+-- Dump completed on 2025-09-19 16:24:27

@@ -27,7 +27,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,7 +36,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2025_09_03_145223_create_contatti_table',1),(3,'2025_09_03_150645_create_passwords_table',1),(4,'2025_09_03_153134_create_recapiti_table',1),(5,'2025_09_03_154115_create_serietv_table',1),(6,'2025_09_03_154124_create_films_table',1),(7,'2025_09_03_154134_create_episodi_table',1),(8,'2025_09_03_154145_create_categorie_table',1),(9,'2025_09_03_165125_create_nazioni_table',1),(10,'2025_09_03_171033_create_sessioni_table',1),(11,'2025_09_03_171949_create_auths_table',1),(12,'2025_09_05_160117_create_comuni_italiani_table',1),(13,'2025_09_08_081449_create_files_table',1),(14,'2025_09_08_123959_create_indirizzi_table',1),(15,'2025_09_08_141811_update_film_table_structure',1),(16,'2025_09_08_143204_modify_durata_column_in_film_table',1),(17,'2025_09_14_152710_create_cache_table',2);
+INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2025_09_03_145223_create_contatti_table',1),(3,'2025_09_03_150645_create_passwords_table',1),(4,'2025_09_03_153134_create_recapiti_table',1),(5,'2025_09_03_154115_create_serietv_table',1),(6,'2025_09_03_154124_create_films_table',1),(7,'2025_09_03_154134_create_episodi_table',1),(8,'2025_09_03_154145_create_categorie_table',1),(9,'2025_09_03_165125_create_nazioni_table',1),(10,'2025_09_03_171033_create_sessioni_table',1),(11,'2025_09_03_171949_create_auths_table',1),(12,'2025_09_05_160117_create_comuni_italiani_table',1),(13,'2025_09_08_081449_create_files_table',1),(14,'2025_09_08_123959_create_indirizzi_table',1),(15,'2025_09_08_141811_update_film_table_structure',1),(16,'2025_09_08_143204_modify_durata_column_in_film_table',1),(17,'2025_09_14_152710_create_cache_table',1),(18,'2025_09_19_000001_add_inizio_sfida_to_auth_table',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-15  9:40:13
+-- Dump completed on 2025-09-19 16:24:26

@@ -42,7 +42,8 @@ class auth extends Model
         'sfida',
         'secretJWT',
         'scadenzaSfida',
-        'sale'
+        'sale',
+        'inizioSfida'
     ];
     
     /**
@@ -51,5 +52,14 @@ class auth extends Model
     public function contatto()
     {
         return $this->belongsTo(contatti::class, 'idContatto', 'idContatto');
+    }
+
+    /**
+     * Restituisce il record auth se esiste ed è valido per il login, altrimenti null.
+     * Al momento consideriamo valido se esiste una riga con campo 'user' uguale a $hashUtente.
+     */
+    public static function esisteUtenteValidoPerLogin(string $hashUtente): ?self
+    {
+        return self::where('user', $hashUtente)->first();
     }
 }

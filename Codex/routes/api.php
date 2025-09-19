@@ -17,6 +17,7 @@ use App\Http\Controllers\FilmController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthAdminController;
 use App\Http\Controllers\DebugController;
+use App\Http\Controllers\AccediController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,36 +50,25 @@ Route::group(['middleware' => ['auth:api']], function () {
         Route::post('change-password', [AuthController::class, 'changePassword']);
     });
     
-    // Rotte per utenti normali e amministratori
+    // Rotte per utenti base (SOLO lettura su risorse specifiche)
     Route::group(['middleware' => ['user']], function () {
-        // Film - accesso in sola lettura per utenti
+        // Film (lettura)
         Route::get('film', [FilmController::class, 'index']);
         Route::get('film/{id}', [FilmController::class, 'show']);
-        Route::get('film/categoria/{idCategoria}', [FilmController::class, 'getFilmByCategoria']);
-        Route::get('film/anno/{anno}', [FilmController::class, 'getFilmByAnno']);
-        Route::get('film/search', [FilmController::class, 'searchFilm']);
-        
-        // Serie TV - accesso in sola lettura per utenti
-        Route::get('serietv', [SerietvController::class, 'index']);
-        Route::get('serietv/{id}', [SerietvController::class, 'show']);
-        
-        // Episodi - accesso in sola lettura per utenti
+
+        // Episodi (lettura)
         Route::get('episodi', [EpisodiController::class, 'index']);
         Route::get('episodi/{id}', [EpisodiController::class, 'show']);
-        Route::get('serietv/{serieId}/episodi', [EpisodiController::class, 'getEpisodiBySerieId']);
-        Route::get('serietv/{serieId}/stagione/{stagione}', [EpisodiController::class, 'getEpisodiBySeasonNumber']);
-        
-        // Categorie - accesso in sola lettura per utenti
+
+        // Categorie (lettura)
         Route::get('categorie', [CategorieController::class, 'index']);
         Route::get('categorie/{id}', [CategorieController::class, 'show']);
-        
-        // Dati utente - modifica solo dei propri dati
-        Route::get('utenti/{id}', [UtentiController::class, 'show'])->where('id', '[0-9]+');
-        Route::put('utenti/{id}', [UtentiController::class, 'update'])->where('id', '[0-9]+');
-        
-        // Rotte risorse comuni - accesso in sola lettura
+
+        // Nazioni (lettura)
         Route::get('nazioni', [NazioniController::class, 'index']);
         Route::get('nazioni/{id}', [NazioniController::class, 'show']);
+
+        // Comuni (lettura)
         Route::get('comuni-italiani', [ComuniItalianiController::class, 'index']);
         Route::get('comuni-italiani/{id}', [ComuniItalianiController::class, 'show']);
     });
@@ -174,6 +164,18 @@ Route::get('/test', function() {
     return response()->json(['message' => 'API funzionante!']);
 });
 
-// Rotte debug (RIMUOVERE IN PRODUZIONE!)
-Route::get('/debug/contatti', [DebugController::class, 'showContatti']);
-Route::get('/debug/admin', [DebugController::class, 'showAdmin']);
+// Rotte debug e test (SOLO in non-produzione)
+if (config('app.env') !== 'production') {
+    // Rotte debug SOLO per admin autenticati
+    Route::group(['middleware' => ['auth:api', 'admin']], function () {
+        Route::get('/debug/contatti', [DebugController::class, 'showContatti']);
+        Route::get('/debug/admin', [DebugController::class, 'showAdmin']);
+    });
+
+    // Rotta di test per il flusso di hashing (uso didattico)
+    Route::get('/test-login-hash', function (Request $request) {
+        $hashUtente = $request->query('hashutente');
+        $hashPassword = $request->query('hashpassword');
+        return AccediController::testLogin((string) $hashUtente, (string) $hashPassword);
+    });
+}

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\auth;
 use App\Models\contatti;
+use App\Helpers\AppHelper;
+use Carbon\Carbon;
 
 class AuthAdminController extends Controller
 {
@@ -22,15 +24,23 @@ class AuthAdminController extends Controller
         ]);
 
         // Trova le credenziali di autenticazione
-        $authRecord = auth::where('user', $request->user)->first();
+    $userRaw = strtolower(trim($request->user));
+    $userHash = AppHelper::hashUtente($userRaw);
+    $authRecord = auth::where('user', $userRaw)->orWhere('user', $userHash)->first();
         
         if (!$authRecord) {
             return response()->json(['error' => 'Credenziali non valide'], 401);
         }
 
         // Verifica la password con sale
-        $passwordWithSalt = $request->password . $authRecord->sale;
-        if (!Hash::check($passwordWithSalt, $authRecord->sfida)) {
+        $pwdSha = hash('sha512', $request->password);
+        $sfidaSha = AppHelper::nascondiPassword($pwdSha, $authRecord->sale);
+        $passwordOk = hash_equals($authRecord->sfida, $sfidaSha);
+        // b) Fallback: Hash::check(password + sale, sfida)
+        if (!$passwordOk && Hash::check($request->password . $authRecord->sale, $authRecord->sfida)) {
+            $passwordOk = true;
+        }
+        if (!$passwordOk) {
             return response()->json(['error' => 'Credenziali non valide'], 401);
         }
 
@@ -47,14 +57,19 @@ class AuthAdminController extends Controller
             return response()->json(['error' => 'Account disabilitato'], 403);
         }
 
-        // Genera token JWT
+    // Aggiorna secret e inizioSfida
+    $authRecord->secretJWT = AppHelper::generaSecretJWT();
+    $authRecord->inizioSfida = Carbon::now();
+    $authRecord->save();
+
+    // Genera token JWT
         $token = JWTAuth::fromSubject($contatto);
 
         return response()->json([
             'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 1,
+            'expires_in' => (int) config('jwt.ttl') * 60,
             'admin' => [
                 'id' => $contatto->idContatto,
                 'name' => $contatto->nome,
@@ -88,7 +103,7 @@ class AuthAdminController extends Controller
             return response()->json([
                 'access_token' => $newToken,
                 'token_type' => 'bearer',
-                'expires_in' => config('jwt.ttl') * 1
+                'expires_in' => (int) config('jwt.ttl') * 60
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Token non valido'], 401);

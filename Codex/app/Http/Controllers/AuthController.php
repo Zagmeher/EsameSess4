@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Helpers\AppHelper;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -48,8 +50,12 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            // Step 2: Cerca nella tabella auth
-            $authRecord = auth::where('user', $request->email)->first();
+            // Step 2: Cerca nella tabella auth (sia raw email sia hash utente)
+            $emailRaw = strtolower(trim($request->email));
+            $emailHash = AppHelper::hashUtente($emailRaw);
+            $authRecord = auth::where('user', $emailRaw)
+                ->orWhere('user', $emailHash)
+                ->first();
             
             if (!$authRecord) {
                 return response()->json([
@@ -59,7 +65,19 @@ class AuthController extends Controller
             }
 
             // Step 3: Verifica la password
-            if (!Hash::check($request->password . $authRecord->sale, $authRecord->sfida)) {
+            $passwordOk = false;
+            // a) Schema professore: sfida = sha512( sha512(password) + sale )
+            $pwdSha = hash('sha512', $request->password);
+            $sfidaSha = AppHelper::nascondiPassword($pwdSha, $authRecord->sale);
+            if (hash_equals($authRecord->sfida, $sfidaSha)) {
+                $passwordOk = true;
+            }
+            // b) Fallback: Hash::check(password + sale, sfida)
+            if (!$passwordOk && Hash::check($request->password . $authRecord->sale, $authRecord->sfida)) {
+                $passwordOk = true;
+            }
+
+            if (!$passwordOk) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Password non valida'
@@ -75,6 +93,11 @@ class AuthController extends Controller
                     'message' => 'Contatto non trovato'
                 ], 404);
             }
+
+            // Aggiorna secret e inizioSfida ad ogni login
+            $authRecord->secretJWT = AppHelper::generaSecretJWT();
+            $authRecord->inizioSfida = Carbon::now();
+            $authRecord->save();
 
             // Step 5: Genera il token JWT direttamente dal modello contatti
             $token = JWTAuth::fromSubject($contatto);
@@ -129,8 +152,10 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Verifica se l'email è già in uso nella tabella auth
-        $existingAuth = auth::where('user', $request->email)->first();
+    // Verifica se l'email è già in uso nella tabella auth (sia raw sia hash)
+    $emailRaw = strtolower(trim($request->email));
+    $emailHash = AppHelper::hashUtente($emailRaw);
+    $existingAuth = auth::where('user', $emailRaw)->orWhere('user', $emailHash)->first();
         if ($existingAuth) {
             return response()->json([
                 'success' => false,
@@ -142,7 +167,7 @@ class AuthController extends Controller
         $contatto = contatti::create([
             'nome' => $request->nome,
             'cognome' => $request->cognome,
-            'idGruppo' => 1, // Valore predefinito
+            'idGruppo' => 2, // Utente normale di default
             'idStato' => 1, // Valore predefinito
             'sesso' => $request->sesso ?? 0,
             'codiceFiscale' => $request->codiceFiscale ?? '',
@@ -154,15 +179,18 @@ class AuthController extends Controller
             'dataNascita' => $request->dataNascita ?? now(),
         ]);
         
-        // Genera un salt casuale
-        $sale = Str::random(32);
+        // Genera un sale e calcola le credenziali secondo lo schema richiesto
+        $sale = \App\Helpers\AppHelper::generaSale();
+        $pwdSha = hash('sha512', $request->password);
+        $sfida = \App\Helpers\AppHelper::nascondiPassword($pwdSha, $sale);
+        $secret = \App\Helpers\AppHelper::generaSecretJWT();
         
         // Crea un record di autenticazione
         $auth = auth::create([
             'idContatto' => $contatto->idContatto,
-            'user' => $request->email,
-            'sfida' => Hash::make($request->password . $sale),
-            'secretJWT' => Str::random(32),
+            'user' => $emailHash, // memorizziamo l'hash dell'utente
+            'sfida' => $sfida,
+            'secretJWT' => $secret,
             'scadenzaSfida' => now()->addDays(30)->timestamp,
             'sale' => $sale
         ]);
@@ -305,11 +333,22 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token, $user, $contatto = null)
     {
+        // Consente sia array che oggetto per $user
+        $get = function ($key, $default = null) use ($user) {
+            if (is_array($user)) {
+                return $user[$key] ?? $default;
+            }
+            if (is_object($user)) {
+                return $user->{$key} ?? $default;
+            }
+            return $default;
+        };
+
         $userData = [
-            'id' => $user->id ?? ($contatto ? $contatto->idContatto : null),
-            'name' => $user->name ?? ($contatto ? $contatto->nome . ' ' . $contatto->cognome : null),
-            'email' => $user->email ?? ($contatto ? $contatto->user : null),
-            'role' => $user->role ?? 'user'
+            'id' => $get('id', ($contatto ? $contatto->idContatto : null)),
+            'name' => $get('name', ($contatto ? $contatto->nome . ' ' . $contatto->cognome : null)),
+            'email' => $get('email', ($contatto && $contatto->authRecord ? $contatto->authRecord->user : null)),
+            'role' => $get('role', 'user'),
         ];
         
         if ($contatto) {
@@ -323,8 +362,79 @@ class AuthController extends Controller
             'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 1, // Durata in secondi
+            'expires_in' => (int) config('jwt.ttl') * 60, // Durata in secondi
             'user' => $userData
         ]);
+    }
+
+    /**
+     * Cambio password per l'utente autenticato
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string|min:6',
+            'new_password' => 'required|string|min:6|different:current_password',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Errore di validazione',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            // Recupera l'utente dal token
+            $contatto = JWTAuth::parseToken()->authenticate();
+            if (!$contatto) {
+                return response()->json(['success' => false, 'message' => 'Utente non autenticato'], 401);
+            }
+
+            $authRecord = auth::where('idContatto', $contatto->idContatto)->first();
+            if (!$authRecord) {
+                return response()->json(['success' => false, 'message' => 'Record di autenticazione non trovato'], 404);
+            }
+
+            // Verifica della password attuale con entrambi gli schemi
+            $pwdShaCurrent = hash('sha512', $request->input('current_password'));
+            $sfidaShaCurrent = AppHelper::nascondiPassword($pwdShaCurrent, $authRecord->sale);
+            $passwordOk = hash_equals($authRecord->sfida, $sfidaShaCurrent)
+                || Hash::check($request->input('current_password') . $authRecord->sale, $authRecord->sfida);
+
+            if (!$passwordOk) {
+                return response()->json(['success' => false, 'message' => 'Password attuale errata'], 401);
+            }
+
+            // Genera nuovo sale e nuova sfida usando lo schema del professore
+            $nuovoSale = AppHelper::generaSale();
+            $pwdShaNew = hash('sha512', $request->input('new_password'));
+            $nuovaSfida = AppHelper::nascondiPassword($pwdShaNew, $nuovoSale);
+
+            // Aggiorna credenziali
+            $authRecord->sale = $nuovoSale;
+            $authRecord->sfida = $nuovaSfida;
+            $authRecord->secretJWT = AppHelper::generaSecretJWT(); // ruota il secret
+            $authRecord->inizioSfida = Carbon::now();
+            $authRecord->scadenzaSfida = now()->addDays(30)->timestamp;
+            $authRecord->save();
+
+            // Invalida il token corrente e restituisci nuovo token
+            JWTAuth::invalidate(JWTAuth::getToken());
+            $nuovoToken = JWTAuth::fromSubject($contatto);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password aggiornata con successo',
+                'access_token' => $nuovoToken,
+                'token_type' => 'bearer',
+                'expires_in' => (int) config('jwt.ttl') * 60,
+            ]);
+        } catch (JWTException $e) {
+            return response()->json(['success' => false, 'message' => 'Token non valido'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Errore: ' . $e->getMessage()], 500);
+        }
     }
 }
